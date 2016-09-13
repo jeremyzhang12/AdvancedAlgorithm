@@ -38,7 +38,7 @@ public class RunExperiments{
         for(Integer v : s){
             List<Node<Integer>> arr = g.getGraph().get(v);
             for(Node<Integer> n : arr){
-                pq.add(new Edge<Integer>(n.getWeight(),v,n.getName()));
+                pq.add(new Edge<>(n.getWeight(),v,n.getName()));
             }
         }
     }
@@ -133,7 +133,7 @@ public class RunExperiments{
 			u = Integer.parseInt(split[0]);
 			v = Integer.parseInt(split[1]);
 			weight = Integer.parseInt(split[2]);
-            pq.add(new Edge<Integer>(weight,u,v));
+            pq.add(new Edge<>(weight,u,v));
 			//Run your recomputeMST function to recalculate the new weight of the MST given the addition of this new edge
 			//Note: you are responsible for maintaining the MST in order to update the cost without recalculating the entire MST
 			long start_newMST = System.nanoTime();
