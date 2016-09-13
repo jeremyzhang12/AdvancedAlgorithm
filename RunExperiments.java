@@ -105,7 +105,6 @@ public class RunExperiments{
 
 		Graph<Integer> G = parseEdges(bufferReader);
         sortPQ(G.getVertices(), G);
-        //Test PriorityQueue is sorted order
         /*
         while(pq.size() > 0){
             System.out.println(pq.poll().getWeight());
