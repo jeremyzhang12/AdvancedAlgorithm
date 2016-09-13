@@ -5,7 +5,6 @@ Feel free to use and modify the code below, or write your own experimental code,
 @author Jingtian Zhang
 */
 
-import com.apple.concurrent.Dispatch;
 
 import java.io.*;
 import java.lang.reflect.Array;
@@ -16,6 +15,7 @@ import java.util.PriorityQueue;
 
 public class RunExperiments{
     // used as a storage for sorted edge
+    public static Graph<Integer> G;
     public static PriorityQueue<Edge<Integer>> pq;
     public static Graph<Integer> mst;
 
@@ -31,14 +31,18 @@ public class RunExperiments{
             int weight = Integer.parseInt(temp[2]);
             g.addEdge(u,v,weight);
         }
+        bf.close();
         return g;
     }
 
     public static void sortPQ(Set<Integer> s, Graph<Integer> g){
+        pq.clear();
         for(Integer v : s){
-            List<Node<Integer>> arr = g.getGraph().get(v);
-            for(Node<Integer> n : arr){
-                pq.add(new Edge<>(n.getWeight(),v,n.getName()));
+            Map<Integer, Integer> m = g.getGraph().get(v);
+            if(m != null) {
+                for (Integer dest : m.keySet()) {
+                    pq.add(new Edge<>(m.get(dest), v, dest));
+                }
             }
         }
     }
@@ -50,12 +54,11 @@ public class RunExperiments{
      */
     public static int computeMST(Graph<Integer> g){
         int cost = 0;
-        PriorityQueue<Edge<Integer>> tmpq = pq;
         HashSet<Integer> visited = new HashSet<>();
         Set<Integer> wholeset = g.getVertices();
         mst = new Graph<>();
-        while(!wholeset.isEmpty()){
-            Edge<Integer> e = tmpq.poll();
+        while(pq.size() > 0){
+            Edge<Integer> e = pq.poll();
             int u = e.getStart();
             int v = e.getEnd();
             if(!visited.contains(u) || !visited.contains(v)){
@@ -63,11 +66,9 @@ public class RunExperiments{
                 cost += e.getWeight();
                 if(!visited.contains(u)){
                     visited.add(u);
-                    wholeset.remove(u);
                 }
                 if(!visited.contains(v)){
                     visited.add(v);
-                    wholeset.remove(v);
                 }
             }
         }
@@ -84,7 +85,7 @@ public class RunExperiments{
 			System.exit(1);
 		}
 
-        pq = new PriorityQueue<Edge<Integer>>(10, new Comparator<Edge<Integer>>() {
+        pq = new PriorityQueue<>(10, new Comparator<Edge<Integer>>() {
             @Override
             public int compare(Edge<Integer> e1, Edge<Integer> e2) {
                 if (e1.getWeight() == e2.getWeight()) {
@@ -103,23 +104,26 @@ public class RunExperiments{
         FileReader inputFile = new FileReader(graph_file);
         BufferedReader bufferReader = new BufferedReader(inputFile);
 
-		Graph<Integer> G = parseEdges(bufferReader);
+		G = parseEdges(bufferReader);
+
+        System.out.println(G.size()); //initially 64
         sortPQ(G.getVertices(), G);
         /*
         while(pq.size() > 0){
-            System.out.println(pq.poll().getWeight());
-        }
-        */
+            Edge<Integer> e = pq.poll();
+            System.out.println(e.getStart() + " " + e.getEnd()+" " + e.getWeight());
+        }*/
+
 		long startMST = System.nanoTime();
 		int MSTweight = computeMST(G);
 		long finishMST = System.nanoTime();
 
-        System.out.println(MSTweight);
+        System.out.println("Old MST cost: " + MSTweight);
 		//Subtract the start time from the finish time to get the actual algorithm running time
-		double MSTtotal = (finishMST - startMST)/1000000;
+		double MSTtotal = (finishMST - startMST);///1000000;
 
 		//Write to output file the initial MST weight and time
-		output.println(Integer.toString(MSTweight) + " " + Double.toString(MSTtotal));
+		output.println("First MST" + Integer.toString(MSTweight) + " " + Double.toString(MSTtotal));
 
 		//Iterate through changes file
 		BufferedReader br = new BufferedReader(new FileReader(change_file));
@@ -133,26 +137,28 @@ public class RunExperiments{
 			u = Integer.parseInt(split[0]);
 			v = Integer.parseInt(split[1]);
 			weight = Integer.parseInt(split[2]);
-            pq.add(new Edge<>(weight,u,v));
+            G.addEdge(u,v,weight);
+            sortPQ(G.getVertices(),G);
+            //System.out.println("Graph size: " + G.size());
+            //System.out.println("PQ size: " + pq.size());
 			//Run your recomputeMST function to recalculate the new weight of the MST given the addition of this new edge
 			//Note: you are responsible for maintaining the MST in order to update the cost without recalculating the entire MST
 			long start_newMST = System.nanoTime();
 			int newMST_weight = recomputeMST(u,v,weight,G);
 			long finish_newMST = System.nanoTime();
-
-			double newMST_total = (finish_newMST - start_newMST)/1000000;
+            //System.out.println("new MST cost: " + newMST_weight);
+			double newMST_total = (finish_newMST - start_newMST);///1000000;
 
 			//Write new MST weight and time to output file
 			output.println(Integer.toString(newMST_weight) + " " + Double.toString(newMST_total));
-
-
 		}
-
+        /* For check purpose
+        sortPQ(G.getVertices(),G);
+        while(pq.size() > 0){
+            Edge<Integer> e = pq.poll();
+            System.out.println(e.getStart() + " " + e.getEnd()+" " + e.getWeight());
+        }*/
 		output.close();
 		br.close();
-
-
-
-
 	}
 }
