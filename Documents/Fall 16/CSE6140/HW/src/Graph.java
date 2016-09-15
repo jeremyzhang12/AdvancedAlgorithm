@@ -31,7 +31,7 @@ public class Graph<V>{
     public void addEdge(V src, V dest, Integer w){
         Map<V,Integer> adjList = graph.get(src);
 
-        if (adjList == null || adjList.isEmpty()) {
+        if (adjList == null) {
             adjList = new HashMap<>();
         }
         if(adjList.containsKey(dest)){
