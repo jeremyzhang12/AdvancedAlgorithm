@@ -1,4 +1,0 @@
-README
-First, open your terminal and change your directory to the current folder.
-Second, compile the java file using "javac RunExperiments.java Edge.java Graph.java"
-Third, run the java files and put arguments as "java RunExperiments arg1 arg2 arg3"
